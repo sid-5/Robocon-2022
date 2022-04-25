@@ -214,23 +214,42 @@ void servo(){
 	}
 }
 
+void passingMotor(){
+	if(passMotor==0 && passDebounce == 0){
+		HAL_GPIO_WritePin(GPIOD, PassingMotor_DIR_Pin, GPIO_PIN_SET);
+
+			  	  	 	__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_3,32);
+			  	  	 	passMotor==1;
+			  	  	 	passDebounce =5;
+	}else if(passMotor==1 && passDebounce == 0){
+		HAL_GPIO_WritePin(GPIOD, PassingMotor_DIR_Pin, GPIO_PIN_SET);
+
+					  	  	 	__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_3,0);
+					  	  	 	passMotor==0;
+					  	  	 	passDebounce =5;
+	}
+}
+
+
+
+
 void linearActuator(int dir){
-	if(dir1 == 0 && linearDebounce==0){
+	if(dir== 0 && dir1 == 0 && linearDebounce==0){
 		 HAL_GPIO_WritePin(GPIOA, LinearActuator_en_Pin, GPIO_PIN_SET);
 		 HAL_GPIO_WritePin(GPIOC, LinearActuator_dir_Pin, GPIO_PIN_RESET);
 		 dir1 = 1;
 		 linearDebounce= 5;
-	}else if(dir1 == 1 && linearDebounce==0){
+	}else if(dir ==0 && dir1 == 1 && linearDebounce==0){
 		 HAL_GPIO_WritePin(GPIOA, LinearActuator_en_Pin, GPIO_PIN_RESET);
 				 dir1=0;
 				 linearDebounce=5;
 	}
-	else if(dir2==0 && linearDebounce==0){
+	if(dir ==1 && dir2==0 && linearDebounce==0){
 		HAL_GPIO_WritePin(GPIOA, LinearActuator_en_Pin, GPIO_PIN_SET);
 		 HAL_GPIO_WritePin(GPIOC, LinearActuator_dir_Pin, GPIO_PIN_SET);
 		 dir2 = 1;
 		 linearDebounce=5;
-	}else if(dir2==1 && linearDebounce==0){
+	}else if(dir == 1 && dir2==1 && linearDebounce==0){
 		HAL_GPIO_WritePin(GPIOA, LinearActuator_en_Pin, GPIO_PIN_RESET);
 
 		 dir2 = 0;
@@ -299,8 +318,6 @@ int main(void)
 	__HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_1,0);//bldc default 0
 	__HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_2,0);
 	__HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_3,50);
-	HAL_GPIO_WritePin(GPIOE, BLDC1_brk_Pin, GPIO_PIN_SET);
- HAL_GPIO_WritePin(GPIOE, BLDC2_brk_Pin, GPIO_PIN_SET);
 
 	////////////////////////////
 
@@ -372,9 +389,7 @@ int main(void)
 	  	  	else if (rxData[0] == 5)
 	  	  	{
 	  	  		//Passing on
-	  	  		HAL_GPIO_WritePin(GPIOD, PassingMotor_DIR_Pin, GPIO_PIN_SET);
-
-	  	  	 	__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_3,32);
+	  	  		passingMotor();
 //
 //	  	  	if(countBldc==0 && bldcDebounce == 0){
 //	  	  					__HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_1,1000);
@@ -420,14 +435,14 @@ int main(void)
 //	  	  	 HAL_GPIO_WritePin(GPIOA, BLDC_PWM1_Pin, GPIO_PIN_SET);
 //	  	  	 HAL_GPIO_WritePin(GPIOA, BLDC_PWM2_Pin, GPIO_PIN_SET);
 				if(countBldc==0 && bldcDebounce == 0){
-					HAL_GPIO_WritePin(GPIOE, BLDC1_brk_Pin, GPIO_PIN_RESET);
-					HAL_GPIO_WritePin(GPIOE, BLDC2_brk_Pin, GPIO_PIN_RESET);
+					HAL_GPIO_WritePin(GPIOC, BLDC_1_Pin, GPIO_PIN_SET);
+					HAL_GPIO_WritePin(GPIOC, BLDC_2_Pin, GPIO_PIN_SET);
 					countBldc=1;
 					bldcDebounce = 5;
 					}
 				else if(countBldc==1 && bldcDebounce == 0){
-					HAL_GPIO_WritePin(GPIOE, BLDC1_brk_Pin, GPIO_PIN_SET);
-				 HAL_GPIO_WritePin(GPIOE, BLDC2_brk_Pin, GPIO_PIN_SET);
+					HAL_GPIO_WritePin(GPIOC, BLDC_2_Pin, GPIO_PIN_RESET);
+				 HAL_GPIO_WritePin(GPIOC, BLDC_1_Pin, GPIO_PIN_RESET);
 					countBldc=0;
 				bldcDebounce = 5;
 	  	  		}
@@ -1020,6 +1035,11 @@ static void MX_GPIO_Init(void)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	//test +=1;
+
+	if(passDebounce>0){
+		passDebounce--;
+	}
+
 	if(linearDebounce>0){
 		linearDebounce--;
 
