@@ -233,7 +233,7 @@ void passingMotor(){
 
 
 
-void linearActuator(int dir){
+void VerticalMotor(int dir){
 	if(dir== 0 && dir1 == 0 && linearDebounce==0){
 		 HAL_GPIO_WritePin(GPIOA, LinearActuator_en_Pin, GPIO_PIN_SET);
 		 HAL_GPIO_WritePin(GPIOC, LinearActuator_dir_Pin, GPIO_PIN_RESET);
@@ -416,7 +416,7 @@ int main(void)
 	  	  	else if(rxData[0] == 7){
 	  	  	// HAL_GPIO_WritePin(GPIOC, LinearActuator_DIR1_Pin, GPIO_PIN_SET);
 			 //HAL_GPIO_WritePin(GPIOC, LinearActuator_DIR2_Pin, GPIO_PIN_SET);
-				linearActuator(1);
+				VerticalMotor(1);
 	  			 //HAL_GPIO_WritePin(GPIOA, LinearActuator_en_Pin, GPIO_PIN_SET);
 	  			 //HAL_GPIO_WritePin(GPIOC, LinearActuator_dir_Pin, GPIO_PIN_RESET);
 	  	  	}
@@ -425,7 +425,7 @@ int main(void)
 	  	  	else if(rxData[0] == 9){
 	  	  	 //HAL_GPIO_WritePin(GPIOC, LinearActuator_DIR1_Pin, GPIO_PIN_SET);
 	  	  		//	 HAL_GPIO_WritePin(GPIOC, LinearActuator_DIR2_Pin, GPIO_PIN_RESET);
-	  	  			 linearActuator(0);
+	  	  			 VerticalMotor(0);
 	  	  		// HAL_GPIO_WritePin(GPIOA, LinearActuator_en_Pin, GPIO_PIN_SET);
 	  	  		// HAL_GPIO_WritePin(GPIOC, LinearActuator_dir_Pin, GPIO_PIN_SET);
 	  	  	}
