@@ -86,8 +86,8 @@ void Error_Handler(void);
 #define LinearActuator_dir_GPIO_Port GPIOC
 #define Encoder2_Pin GPIO_PIN_9
 #define Encoder2_GPIO_Port GPIOE
-#define GPIO3_1_Pin GPIO_PIN_11
-#define GPIO3_1_GPIO_Port GPIOE
+#define Laser_pointer_Pin GPIO_PIN_11
+#define Laser_pointer_GPIO_Port GPIOE
 #define GPIO3_2_Pin GPIO_PIN_12
 #define GPIO3_2_GPIO_Port GPIOE
 #define PassingMotor_DIR_Pin GPIO_PIN_9

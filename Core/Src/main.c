@@ -112,7 +112,10 @@ int bldcDebounce = 0;
 int linearDebounce=5;
 int dir1=0;
 int dir2=0;
-
+int laserr = 0;
+int laserDebounce = 0;
+int passMotor = 0;
+int passDebounce = 0;
 //if PWM is not working then use max 40kHz of frequency for cytron driver
 
 
@@ -215,23 +218,33 @@ void servo(){
 }
 
 void passingMotor(){
-	if(passMotor==0 && passDebounce == 0){
+	if(passMotor == 0 && passDebounce == 0){
 		HAL_GPIO_WritePin(GPIOD, PassingMotor_DIR_Pin, GPIO_PIN_SET);
 
 			  	  	 	__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_3,32);
-			  	  	 	passMotor==1;
+			  	  	 	passMotor=1;
 			  	  	 	passDebounce =5;
-	}else if(passMotor==1 && passDebounce == 0){
+	}else if(passMotor == 1 && passDebounce == 0){
 		HAL_GPIO_WritePin(GPIOD, PassingMotor_DIR_Pin, GPIO_PIN_SET);
-
 					  	  	 	__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_3,0);
-					  	  	 	passMotor==0;
-					  	  	 	passDebounce =5;
+					  	  	 	passMotor=0;
+					  	  	 	passDebounce = 5;
 	}
 }
 
 
+void laser(){
+	if(laserr==0 && laserDebounce==0){
+		HAL_GPIO_WritePin(GPIOE, Laser_pointer_Pin, GPIO_PIN_SET);
+		laserr = 1;
+		laserDebounce = 5;
+	}else if(laserr==1 && laserDebounce==0){
+		HAL_GPIO_WritePin(GPIOE, Laser_pointer_Pin, GPIO_PIN_RESET);
+		laserr = 0;
+		laserDebounce = 5;
+	}
 
+}
 
 void VerticalMotor(int dir){
 	if(dir== 0 && dir1 == 0 && linearDebounce==0){
@@ -315,10 +328,11 @@ int main(void)
 	HAL_TIM_Base_Start_IT(&htim9);
 	HAL_UART_Receive_DMA(&huart1, (uint8_t *)rxData, 3);
 	__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_4,50);
-	__HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_1,0);//bldc default 0
+	__HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_1,0);//bldc default 030:94:35:32:df:3e
 	__HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_2,0);
 	__HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_3,50);
 
+	HAL_GPIO_WritePin(GPIOE, Laser_pointer_Pin, GPIO_PIN_SET);
 	////////////////////////////
 
 	__HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_2,100);
@@ -482,7 +496,7 @@ int main(void)
 	  	  	  	  	 __HAL_TIM_SET_COMPARE(&htim4,TIM_CHANNEL_1,0);//locomotion 0
 	  	  	  	  	 __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_2,0);
 
-	  	  	  	  		  		__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_3,0);//Passing 0
+
 	  	  	  	  		__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_4,0);//lifting 0
 
 	  	  	  	  __HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_1,0);//BLDC 0
@@ -975,7 +989,7 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOE, BLDC1_brk_Pin|BLDC2_brk_Pin|GPIO2_1_Pin|GPIO2_2_Pin
-                          |GPIO3_1_Pin|GPIO3_2_Pin, GPIO_PIN_RESET);
+                          |Laser_pointer_Pin|GPIO3_2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, BLDC_1_Pin|BLDC_2_Pin|Motor3_DIR1_Pin|LinearActuator_dir_Pin
@@ -991,9 +1005,9 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(STEPPER_DIR_GPIO_Port, STEPPER_DIR_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : BLDC1_brk_Pin BLDC2_brk_Pin GPIO2_1_Pin GPIO2_2_Pin
-                           GPIO3_1_Pin GPIO3_2_Pin */
+                           Laser_pointer_Pin GPIO3_2_Pin */
   GPIO_InitStruct.Pin = BLDC1_brk_Pin|BLDC2_brk_Pin|GPIO2_1_Pin|GPIO2_2_Pin
-                          |GPIO3_1_Pin|GPIO3_2_Pin;
+                          |Laser_pointer_Pin|GPIO3_2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -1036,6 +1050,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	//test +=1;
 
+	if(laserDebounce>0){
+		laserDebounce--;
+	}
 	if(passDebounce>0){
 		passDebounce--;
 	}
