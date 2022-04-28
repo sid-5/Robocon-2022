@@ -7,6 +7,7 @@ int flag =1;
 int ig52Debounce = 0;
 int ig = 0;
 int shaft = 0;
+int onn = 0;
 int shaftDebounce = 0;
 void setup() {
  
@@ -181,8 +182,13 @@ void loop() {
       Serial.write(data[0]);
       Serial.write(data[1]);
       Serial.write(data[2]);
-      if(millis()-shaftDebounce>500){
+      if(millis()-shaftDebounce>500 && onn == 0){
+        onn = 1;  
         ledcWrite(4, 220);
+        shaftDebounce=millis();
+      }else if(millis()-shaftDebounce>500 && onn == 1){
+        onn = 0;
+        ledcWrite(4, 0);
         shaftDebounce=millis();
       }
   }
@@ -202,6 +208,7 @@ void loop() {
       Serial.write(data[1]);
       Serial.write(data[2]);
       ledcWrite(5, 20);
+      digitalWrite(26,LOW);
       
   }else if (PS4.R2()){
     data[0] = 10;
@@ -235,7 +242,6 @@ void loop() {
     ledcWrite(1, 0);
     ledcWrite(2, 0);
     ledcWrite(3, 0);
-    ledcWrite(4, 0);
     ledcWrite(5, 0);
   }
       data[0] = 0;
