@@ -50,7 +50,7 @@ void loop() {
   
   if(PS4.isConnected()) {
     Serial.println("in");
-    if(PS4.Triangle() && !digitalRead(35) && PS4.Circle()){
+    if(PS4.Triangle() && PS4.Circle()){
        data[0] = 20;
       data[1]= 0;
       data[2] = 0;
@@ -63,7 +63,7 @@ void loop() {
       digitalWrite(22, LOW);
       
     }
-    else if(PS4.Triangle() && !digitalRead(35) && PS4.Square()){
+    else if(PS4.Triangle() && PS4.Square()){
        data[0] = 21;
       data[1]= 0;
       data[2] = 0;
@@ -75,7 +75,7 @@ void loop() {
       ledcWrite(2, 70);
       digitalWrite(22, HIGH);
       
-    }else if(PS4.Cross() && PS4.Square()){
+    }else if(PS4.Cross() && !digitalRead(35) && PS4.Square()){
        data[0] = 22;
       data[1]= 0;
       data[2] = 0;
@@ -88,7 +88,7 @@ void loop() {
       digitalWrite(22, HIGH);
       
   
-    }else if(PS4.Cross() && PS4.Circle()){
+    }else if(PS4.Cross()  && !digitalRead(35) && PS4.Circle()){
        data[0] = 23;
       data[1]= 0;
       data[2] = 0;

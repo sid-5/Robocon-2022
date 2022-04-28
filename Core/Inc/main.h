@@ -62,6 +62,10 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define Limit_switch_input_Pin GPIO_PIN_2
 #define Limit_switch_input_GPIO_Port GPIOE
+#define Laser1_en_Pin GPIO_PIN_3
+#define Laser1_en_GPIO_Port GPIOE
+#define Laser2_en_Pin GPIO_PIN_4
+#define Laser2_en_GPIO_Port GPIOE
 #define GPIO2_2_Pin GPIO_PIN_5
 #define GPIO2_2_GPIO_Port GPIOE
 #define BLDC_1_Pin GPIO_PIN_1

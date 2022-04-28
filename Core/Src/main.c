@@ -235,11 +235,15 @@ void passingMotor(){
 
 void laser(){
 	if(laserr==0 && laserDebounce==0){
-		HAL_GPIO_WritePin(GPIOE, Laser_pointer_Pin, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(GPIOE,  Laser1_en_Pin, GPIO_PIN_SET);
+			  	  HAL_GPIO_WritePin(GPIOD,  Laser2_en_Pin, GPIO_PIN_SET);
+
 		laserr = 1;
 		laserDebounce = 5;
 	}else if(laserr==1 && laserDebounce==0){
-		HAL_GPIO_WritePin(GPIOE, Laser_pointer_Pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(GPIOD,  Laser1_en_Pin, GPIO_PIN_RESET);
+			  	  HAL_GPIO_WritePin(GPIOD,  Laser2_en_Pin, GPIO_PIN_RESET);
+
 		laserr = 0;
 		laserDebounce = 5;
 	}
@@ -471,16 +475,18 @@ int main(void)
 				stepper();
 	  	  	}
 	  	  	  //Lifting Up //Button Triangle
-	  	  	else if(rxData[0] == 11 && !HAL_GPIO_ReadPin (GPIOE, Limit_switch_input_Pin)){ //added limit switch to pulling up
+	  	  	else if(rxData[0] == 11 && !HAL_GPIO_ReadPin(GPIOE, Limit_switch_input_Pin)){ //added limit switch to pulling up
 				 HAL_GPIO_WritePin(GPIOD, LiftingMotor_DIR_Pin, GPIO_PIN_SET);
 
-				 __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_4,250);
+				 __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_4,75);
 	  	  	}
 	  	  	  //Lifting Down// Button Cross
 	  	  	else if(rxData[0] == 12){
 	  	  	  	  HAL_GPIO_WritePin(GPIOD,  LiftingMotor_DIR_Pin, GPIO_PIN_RESET);
+				  __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_4,75);
+	  	  	}else if(rxData[0] == 13 && laserDebounce == 0){
+	  	  			laser();
 
-				  __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_4,250);
 	  	  	}
 	  	  	else{
 	  	  	  	  		  	//repeating block to set PID frequency and setting tp zero
@@ -989,7 +995,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOE, GPIO_PIN_3|GPIO_PIN_4|GPIO2_2_Pin|Laser_pointer_Pin
+  HAL_GPIO_WritePin(GPIOE, Laser1_en_Pin|Laser2_en_Pin|GPIO2_2_Pin|Laser_pointer_Pin
                           |GPIO3_2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
@@ -1011,9 +1017,9 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(Limit_switch_input_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PE3 PE4 GPIO2_2_Pin Laser_pointer_Pin
+  /*Configure GPIO pins : Laser1_en_Pin Laser2_en_Pin GPIO2_2_Pin Laser_pointer_Pin
                            GPIO3_2_Pin */
-  GPIO_InitStruct.Pin = GPIO_PIN_3|GPIO_PIN_4|GPIO2_2_Pin|Laser_pointer_Pin
+  GPIO_InitStruct.Pin = Laser1_en_Pin|Laser2_en_Pin|GPIO2_2_Pin|Laser_pointer_Pin
                           |GPIO3_2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;

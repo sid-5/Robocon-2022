@@ -7,7 +7,7 @@ void setup() {
   Serial.begin(115200);
  //54:8d:5a:88:d9:f1
  //30:94:35:32:df:3e
-  PS4.begin("30:94:35:32:df:3e");
+  PS4.begin("54:8d:5a:88:d9:f1");
   Serial.println("Ready.");
   
    
@@ -25,7 +25,7 @@ void loop() {
       Serial.write(data[2]);
       
     }
-    else if(PS4.Triangle() && PS4.Recangle()){
+    else if(PS4.Triangle() && PS4.Square()){
        data[0] = 21;
       data[1]= 0;
       data[2] = 0;
@@ -33,7 +33,7 @@ void loop() {
       Serial.write(data[1]);
       Serial.write(data[2]);
       
-    }else if(PS4.Cross() && PS4.Rectangle()){
+    }else if(PS4.Cross() && PS4.Square()){
        data[0] = 22;
       data[1]= 0;
       data[2] = 0;
@@ -159,6 +159,14 @@ void loop() {
       Serial.write(data[1]);
       Serial.write(data[2]);
       
+  }else if(PS4.Touchpad()){
+ data[0] = 13;
+      data[1]= 0;
+      data[2] = 0;
+      Serial.write(data[0]);
+      Serial.write(data[1]);
+      Serial.write(data[2]);
+    
   }
       data[0] = 0;
       data[1]= 0;
