@@ -336,6 +336,7 @@ int main(void)
 	////////////////////////////
 
 	__HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_2,100);
+	__HAL_TIM_SET_COMPARE(&htim10, TIM_CHANNEL_1,0);
   /* USER CODE END 2 */
 
   /* Infinite loop */
