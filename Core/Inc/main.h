@@ -60,12 +60,8 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define BLDC1_brk_Pin GPIO_PIN_2
-#define BLDC1_brk_GPIO_Port GPIOE
-#define BLDC2_brk_Pin GPIO_PIN_3
-#define BLDC2_brk_GPIO_Port GPIOE
-#define GPIO2_1_Pin GPIO_PIN_4
-#define GPIO2_1_GPIO_Port GPIOE
+#define Limit_switch_input_Pin GPIO_PIN_2
+#define Limit_switch_input_GPIO_Port GPIOE
 #define GPIO2_2_Pin GPIO_PIN_5
 #define GPIO2_2_GPIO_Port GPIOE
 #define BLDC_1_Pin GPIO_PIN_1

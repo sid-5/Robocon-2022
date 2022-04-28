@@ -470,7 +470,7 @@ int main(void)
 				stepper();
 	  	  	}
 	  	  	  //Lifting Up //Button Triangle
-	  	  	else if(rxData[0] == 11){
+	  	  	else if(rxData[0] == 11 && !HAL_GPIO_ReadPin (GPIOE, Limit_switch_input_Pin)){ //added limit switch to pulling up
 				 HAL_GPIO_WritePin(GPIOD, LiftingMotor_DIR_Pin, GPIO_PIN_SET);
 
 				 __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_4,250);
@@ -988,8 +988,8 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOE, BLDC1_brk_Pin|BLDC2_brk_Pin|GPIO2_1_Pin|GPIO2_2_Pin
-                          |Laser_pointer_Pin|GPIO3_2_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOE, GPIO_PIN_3|GPIO_PIN_4|GPIO2_2_Pin|Laser_pointer_Pin
+                          |GPIO3_2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, BLDC_1_Pin|BLDC_2_Pin|Motor3_DIR1_Pin|LinearActuator_dir_Pin
@@ -1004,10 +1004,16 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(STEPPER_DIR_GPIO_Port, STEPPER_DIR_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : BLDC1_brk_Pin BLDC2_brk_Pin GPIO2_1_Pin GPIO2_2_Pin
-                           Laser_pointer_Pin GPIO3_2_Pin */
-  GPIO_InitStruct.Pin = BLDC1_brk_Pin|BLDC2_brk_Pin|GPIO2_1_Pin|GPIO2_2_Pin
-                          |Laser_pointer_Pin|GPIO3_2_Pin;
+  /*Configure GPIO pin : Limit_switch_input_Pin */
+  GPIO_InitStruct.Pin = Limit_switch_input_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(Limit_switch_input_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : PE3 PE4 GPIO2_2_Pin Laser_pointer_Pin
+                           GPIO3_2_Pin */
+  GPIO_InitStruct.Pin = GPIO_PIN_3|GPIO_PIN_4|GPIO2_2_Pin|Laser_pointer_Pin
+                          |GPIO3_2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
