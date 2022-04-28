@@ -478,12 +478,12 @@ int main(void)
 	  	  	else if(rxData[0] == 11 && !HAL_GPIO_ReadPin(GPIOE, Limit_switch_input_Pin)){ //added limit switch to pulling up
 				 HAL_GPIO_WritePin(GPIOD, LiftingMotor_DIR_Pin, GPIO_PIN_SET);
 
-				 __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_4,75);
+				 __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_4,85);
 	  	  	}
 	  	  	  //Lifting Down// Button Cross
 	  	  	else if(rxData[0] == 12){
 	  	  	  	  HAL_GPIO_WritePin(GPIOD,  LiftingMotor_DIR_Pin, GPIO_PIN_RESET);
-				  __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_4,75);
+				  __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_4,85);
 	  	  	}else if(rxData[0] == 13 && laserDebounce == 0){
 	  	  			laser();
 

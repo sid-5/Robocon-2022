@@ -46,7 +46,7 @@ void setup() {
 }
 int data[3] = {};
 void loop() {
-  if(millis()-prev_time>100){
+  if(millis()-prev_time>70){
   // Below has all accessible outputs from the controller
   
   if(PS4.isConnected()) {
@@ -60,7 +60,7 @@ void loop() {
       Serial.write(data[2]);
        ledcWrite(3, 230);
       digitalWrite(23, HIGH);
-      ledcWrite(2, 70);
+      ledcWrite(2, 100);
       digitalWrite(22, LOW);
       
     }
@@ -73,7 +73,7 @@ void loop() {
       Serial.write(data[2]);
        ledcWrite(3, 230);
       digitalWrite(23, HIGH);
-      ledcWrite(2, 70);
+      ledcWrite(2, 100);
       digitalWrite(22, HIGH);
       
     }else if(PS4.Cross() && !digitalRead(35) && PS4.Square()){
@@ -85,7 +85,7 @@ void loop() {
       Serial.write(data[2]);
       ledcWrite(3, 230);
       digitalWrite(23, LOW);
-      ledcWrite(2, 70);
+      ledcWrite(2, 100);
       digitalWrite(22, HIGH);
       
   
@@ -98,7 +98,7 @@ void loop() {
       Serial.write(data[2]);
       ledcWrite(3, 230);
       digitalWrite(23, LOW);
-      ledcWrite(2, 70);
+      ledcWrite(2, 100);
       digitalWrite(22, LOW);
       
     }
@@ -109,8 +109,8 @@ void loop() {
       Serial.write(data[0]);
       Serial.write(data[1]);
       Serial.write(data[2]);
-      ledcWrite(0, 150);
-      ledcWrite(1, 150);
+      ledcWrite(0, 110);
+      ledcWrite(1, 110);
       digitalWrite(5, LOW);
       digitalWrite(18, HIGH);
     }
@@ -122,8 +122,8 @@ void loop() {
       Serial.write(data[0]);
       Serial.write(data[1]);
       Serial.write(data[2]);
-      ledcWrite(0, 150);
-      ledcWrite(1, 150);
+      ledcWrite(0, 110);
+      ledcWrite(1, 110);
       digitalWrite(5, HIGH);
       digitalWrite(18, LOW);
     }
@@ -135,8 +135,8 @@ void loop() {
       Serial.write(data[0]);
       Serial.write(data[1]);
       Serial.write(data[2]);
-      ledcWrite(0, 150);
-      ledcWrite(1, 150);
+      ledcWrite(0, 110);
+      ledcWrite(1, 110);
       digitalWrite(5, HIGH);
       digitalWrite(18, HIGH);
     }
@@ -148,8 +148,8 @@ void loop() {
       Serial.write(data[0]);
       Serial.write(data[1]);
       Serial.write(data[2]);
-      ledcWrite(0, 150);
-      ledcWrite(1, 150);
+      ledcWrite(0, 110);
+      ledcWrite(1, 110);
       digitalWrite(5, LOW);
       digitalWrite(18, LOW);
     }
@@ -161,7 +161,7 @@ void loop() {
       Serial.write(data[0]);
       Serial.write(data[1]);
       Serial.write(data[2]);
-       ledcWrite(2, 70);
+       ledcWrite(2, 100);
       digitalWrite(22, HIGH);
     }
 
@@ -172,7 +172,7 @@ void loop() {
       Serial.write(data[0]);
       Serial.write(data[1]);
       Serial.write(data[2]);
-      ledcWrite(2, 70);
+      ledcWrite(2, 100);
       digitalWrite(22, LOW);
     }
     else if (PS4.L1()){
@@ -219,7 +219,7 @@ void loop() {
       Serial.write(data[2]);
       digitalWrite(26,HIGH);
       ledcWrite(5, 20);
-  }else if(PS4.Triangle() && !digitalRead(35)){
+  }else if(PS4.Triangle()){
     data[0] = 11;
       data[1]= 0;
       data[2] = 0;
@@ -228,7 +228,7 @@ void loop() {
       Serial.write(data[2]);
       ledcWrite(3, 230);
       digitalWrite(23, HIGH);
-  }else if(PS4.Cross()){
+  }else if(PS4.Cross()  && !digitalRead(35)){
     data[0] = 12;
       data[1]= 0;
       data[2] = 0;
