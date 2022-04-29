@@ -51,7 +51,39 @@ void loop() {
   
   if(PS4.isConnected()) {
     Serial.println("in");
-    if(PS4.Triangle() && PS4.Circle()){
+    if(PS4.Up() && PS4.Triangle()){
+      ledcWrite(0, 110);
+      ledcWrite(1, 110);
+      digitalWrite(5, LOW);
+      digitalWrite(18, HIGH);
+      ledcWrite(3, 230);
+      digitalWrite(23, HIGH);
+    }
+    else if(PS4.Up() && PS4.Cross()){
+       ledcWrite(0, 110);
+      ledcWrite(1, 110);
+      digitalWrite(5, HIGH);
+      digitalWrite(18, LOW);
+      ledcWrite(3, 230);
+      digitalWrite(23, LOW);
+    }
+    else if(PS4.Down() && PS4.Triangle()){
+       ledcWrite(0, 110);
+      ledcWrite(1, 110);
+      digitalWrite(5, HIGH);
+      digitalWrite(18, LOW);
+      ledcWrite(3, 230);
+      digitalWrite(23, HIGH);
+    }
+    else if(PS4.Down() && PS4.Cross()){
+       ledcWrite(0, 110);
+      ledcWrite(1, 110);
+      digitalWrite(5, HIGH);
+      digitalWrite(18, LOW);
+      ledcWrite(3, 230);
+      digitalWrite(23, LOW);
+    }
+    else if(PS4.Triangle() && PS4.Circle()){
        data[0] = 20;
       data[1]= 0;
       data[2] = 0;
@@ -228,7 +260,7 @@ void loop() {
       Serial.write(data[2]);
       ledcWrite(3, 230);
       digitalWrite(23, HIGH);
-  }else if(PS4.Cross()  && !digitalRead(35)){
+  }else if(PS4.Cross()){ //  && !digitalRead(35)){
     data[0] = 12;
       data[1]= 0;
       data[2] = 0;
