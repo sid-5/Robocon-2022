@@ -5,9 +5,9 @@
 void setup() {
  
   Serial.begin(115200);
- //54:8d:5a:88:d9:f1
+ //54:8d:5a:0b:66:1f
  //30:94:35:32:df:3e
-  PS4.begin("54:8d:5a:88:d9:f1");
+  PS4.begin("54:8d:5a:0b:66:1f");
   Serial.println("Ready.");
   
    
