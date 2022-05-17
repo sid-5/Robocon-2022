@@ -7,7 +7,7 @@ void setup() {
   Serial.begin(115200);
  //54:8d:5a:0b:66:1f
  //30:94:35:32:df:3e
-  PS4.begin("54:8d:5a:0b:66:1f");
+  PS4.begin("30:94:35:32:df:3e");
   Serial.println("Ready.");
   
    
@@ -23,6 +23,7 @@ void loop() {
       Serial.write(data[0]);
       Serial.write(data[1]);
       Serial.write(data[2]);
+      Serial.print("received");
       
     }
     else if(PS4.Triangle() && PS4.Square()){
@@ -67,6 +68,7 @@ void loop() {
       Serial.write(data[0]);
       Serial.write(data[1]);
       Serial.write(data[2]);
+      Serial.println("fdsfs");
 
     }
 

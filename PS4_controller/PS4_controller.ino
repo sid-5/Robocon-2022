@@ -13,8 +13,8 @@ void setup() {
  
   Serial.begin(115200);
  //54:8d:5a:88:d9:f1
- //30:94:35:32:df:3e
-  PS4.begin("30:94:35:32:df:3e");
+ //18:26:49:32:57:0C
+  PS4.begin("18:26:49:32:57:0C");
   Serial.println("Ready.");
   ledcSetup(0, 5000, 8); //loco1 
   ledcSetup(1, 5000, 8); //loco2
@@ -138,6 +138,7 @@ void loop() {
 //      
 //    }
     if (PS4.Up()){
+      Serial.println("debug");
       data[0] = 1;
       data[1]= 0;
       data[2] = 0;
