@@ -20,6 +20,7 @@ int ball_pick_pwm = 32;
 
 int curr_pwm = 0;
 bool grab_flag = 0;
+bool ball_pick_flag = 0;
 
 void setup() {
   // put your setup code here, to run once:
@@ -46,8 +47,8 @@ void setup() {
   ledcSetup(4, 5000, 8); // Ball Pass
   ledcSetup(5, 5000, 8); // Ball Pick
 
-  ledcAttachPin(ball_pass_pwm, 4); // D4 -> Ball Pick
-  ledcAttachPin(ball_pick_pwm, 5); // D16 -> Ball Pass
+  ledcAttachPin(ball_pass_pwm, 5); // D4 -> Ball Pick
+  ledcAttachPin(ball_pick_pwm, 4); // D16 -> Ball Pass
   pinMode(ball_pick_dir, OUTPUT); // Ball Pick Dir
   pinMode(ball_pass_dir, OUTPUT); // Ball Pass Dir
 
@@ -102,7 +103,7 @@ void loop() {
       if (PS4.Square()){ //Lagori Grab
           Serial.println("Square");
           ledcWrite(2, 100);
-          digitalWrite(lagori_grab_dir, HIGH);
+          digitalWrite(lagori_grab_dir, LOW);
           curr_pwm = 160;
           grab_flag = 1;
       }
@@ -115,7 +116,7 @@ void loop() {
       else if (PS4.Circle()){ //Lagori Grab
         Serial.println("Circle");
         ledcWrite(2, 100);
-        digitalWrite(lagori_grab_dir, LOW);
+        digitalWrite(lagori_grab_dir, HIGH);
         curr_pwm = 160;
         grab_flag = 1;
       }
@@ -127,32 +128,41 @@ void loop() {
       }
       else if (PS4.L1()){ // Ball pass
         Serial.println("L1");
-        ledcWrite(4, 160);
+        ledcWrite(5, 20);
         digitalWrite(ball_pass_dir, LOW);
       }
       else if (PS4.L2()){ // Ball Pass
         Serial.println("L2");
-        ledcWrite(4, 160);
+        ledcWrite(5, 20);
         digitalWrite(ball_pass_dir, HIGH);
       }
       else if (PS4.R1()){ // ball pick
         Serial.println("R1");
-        ledcWrite(5, 160);
-        digitalWrite(ball_pick_dir, LOW);
+//        ledcWrite(4, 160);
+//        digitalWrite(ball_pick_dir, LOW);
+          ball_pick_flag = (!ball_pick_flag) ? 1 : 0;
+          Serial.println(ball_pick_flag);
       }
       else if (PS4.R2()){ // Ball Pick
         Serial.println("R2");
-        ledcWrite(5, 160);
-        digitalWrite(ball_pick_dir, HIGH);
+//        ledcWrite(4, 160);
+//        digitalWrite(ball_pick_dir, HIGH);
       }
       else{
-        //ledcWrite(2, 0);
+        // ledcWrite(2, 0);
         ledcWrite(3, 0);
-        ledcWrite(4, 0);
-        grab_flag = 0;
-        Serial.println(grab_flag);
-        Serial.println(curr_pwm);
+        // ledcWrite(4, 0);
         ledcWrite(5, 0);
+        if (ball_pick_flag){
+            ledcWrite(4, 160);
+        }
+        else{
+          ledcWrite(4, 160);
+          ball_pick_flag = 0
+        }
+        grab_flag = 0;
+//        Serial.println(grab_flag);
+//        Serial.println(curr_pwm);
 //        while (curr_pwm>0){
 //          cur_pwm -= 20;
 //          ledcWrite(5, curr_pwm);
@@ -162,7 +172,7 @@ void loop() {
     }
     
     while ((curr_pwm>0) && (!grab_flag)){
-        curr_pwm -= 50;
+        curr_pwm -= 80;
         if (curr_pwm<0){
           curr_pwm=0;
         }
