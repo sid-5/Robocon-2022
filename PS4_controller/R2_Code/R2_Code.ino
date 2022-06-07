@@ -39,18 +39,18 @@ void setup() {
   ledcSetup(2, 5000, 8); // Lagori Grab
   ledcSetup(3, 5000, 8); // Lagori Lift
 
-  ledcAttachPin(lagori_grab_pwm, 2); // D32 -> Lagori Grab
-  ledcAttachPin(lagori_lift_pwm, 3); // D25 -> Lagori Lift
-  pinMode(lagori_grab_dir, OUTPUT); // D33 -> Lagori Grab Dir
-  pinMode(lagori_lift_dir, OUTPUT); // D26 -> Lagori Lift Dir
+  ledcAttachPin(lagori_grab_pwm, 2); // D19 -> Lagori Grab
+  ledcAttachPin(lagori_lift_pwm, 3); // D21 -> Lagori Lift
+  pinMode(lagori_grab_dir, OUTPUT); // D22 -> Lagori Grab Dir
+  pinMode(lagori_lift_dir, OUTPUT); // D23 -> Lagori Lift Dir
 
-  ledcSetup(4, 5000, 8); // Ball Pass
+  ledcSetup(6, 5000, 8); // Ball Pass
   ledcSetup(5, 5000, 8); // Ball Pick
 
-  ledcAttachPin(ball_pass_pwm, 5); // D4 -> Ball Pick
-  ledcAttachPin(ball_pick_pwm, 4); // D16 -> Ball Pass
-  pinMode(ball_pick_dir, OUTPUT); // Ball Pick Dir
-  pinMode(ball_pass_dir, OUTPUT); // Ball Pass Dir
+  ledcAttachPin(ball_pass_pwm, 5); // D27 -> Ball Pass
+  ledcAttachPin(ball_pick_pwm, 6); // D32 -> Ball Pick
+  pinMode(ball_pick_dir, OUTPUT); // D25 -> Ball Pick Dir
+  pinMode(ball_pass_dir, OUTPUT); // D26 -> Ball Pass Dir
 
   pinMode(35, INPUT); // Top Limit Switch
   pinMode(34, INPUT); // Bottom Limit Switch
@@ -58,7 +58,7 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  if (millis()-prev_time>70){
+  if (millis()-prev_time>150){ //subject to change
     if (PS4.isConnected()){
       if (PS4.Up()){
         ledcWrite(0, 160);
@@ -140,12 +140,18 @@ void loop() {
         Serial.println("R1");
 //        ledcWrite(4, 160);
 //        digitalWrite(ball_pick_dir, LOW);
-          ball_pick_flag = (!ball_pick_flag) ? 1 : 0;
+          if (ball_pick_flag==0){
+            ball_pick_flag=1;
+          }
+          else{
+            ball_pick_flag=0;
+          }
           Serial.println(ball_pick_flag);
       }
       else if (PS4.R2()){ // Ball Pick
         Serial.println("R2");
-//        ledcWrite(4, 160);
+        ledcWrite(6, 0);
+        ball_pick_flag = 0;
 //        digitalWrite(ball_pick_dir, HIGH);
       }
       else{
@@ -154,11 +160,12 @@ void loop() {
         // ledcWrite(4, 0);
         ledcWrite(5, 0);
         if (ball_pick_flag){
-            ledcWrite(4, 160);
+            ledcWrite(6, 160);
         }
         else{
-          ledcWrite(4, 160);
-          ball_pick_flag = 0
+          ledcWrite(6, 0);
+          ball_pick_flag = 0;
+          Serial.println("0");
         }
         grab_flag = 0;
 //        Serial.println(grab_flag);
