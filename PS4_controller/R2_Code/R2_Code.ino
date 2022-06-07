@@ -157,7 +157,7 @@ void loop() {
             ledcWrite(4, 160);
         }
         else{
-          ledcWrite(4, 160);
+          ledcWrite(4, 0);
           ball_pick_flag = 0
         }
         grab_flag = 0;
