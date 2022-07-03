@@ -25,7 +25,8 @@ bool ball_pick_flag = 0;
 void setup() {
   // put your setup code here, to run once:
   // PS4.begin("30:94:35:32:df:3e");
-  PS4.begin("18:26:49:32:57:0C");
+//  PS4.begin("18:26:49:32:57:0C");
+  PS4.begin("48:5f:99:09:76:b2");
   // PS4.begin("cc:66:0a:c9:41:d1");
   Serial.begin(115200);
   
@@ -61,29 +62,29 @@ void loop() {
   if (millis()-prev_time>150){ //subject to change
     if (PS4.isConnected()){
       if (PS4.Up()){
-        ledcWrite(0, 160);
-        ledcWrite(1, 160);
+        ledcWrite(0, 230);
+        ledcWrite(1, 230);
         digitalWrite(loco_dir1, HIGH);
         digitalWrite(loco_dir2, LOW);      
       }
       
       else if (PS4.Down()){
-        ledcWrite(0, 160);
-        ledcWrite(1, 160);
+        ledcWrite(0, 230);
+        ledcWrite(1, 230);
         digitalWrite(loco_dir1, LOW);
         digitalWrite(loco_dir2, HIGH);  
       }
       
       else if (PS4.Left()){
-        ledcWrite(0, 160);
-        ledcWrite(1, 160);
+        ledcWrite(0, 210);
+        ledcWrite(1, 170);
         digitalWrite(loco_dir1, HIGH);
         digitalWrite(loco_dir2, HIGH);  
       }
       
       else if (PS4.Right()){
-        ledcWrite(0, 160);
-        ledcWrite(1, 160);
+        ledcWrite(0, 170);
+        ledcWrite(1, 210);
         digitalWrite(loco_dir1, LOW);
         digitalWrite(loco_dir2, LOW);  
       }
@@ -108,9 +109,10 @@ void loop() {
           grab_flag = 1;
       }
       else if ((PS4.Triangle()) && (digitalRead(35))){ // Not kadhlay for testing. LIMIT SWITCH lavla ki parat taaka. 
+        
         // Lagori Lift
         Serial.println("Triangle");
-        ledcWrite(3, 160);
+        ledcWrite(3, 255);
         digitalWrite(lagori_lift_dir, HIGH);
       }
       else if (PS4.Circle()){ //Lagori Grab
@@ -123,7 +125,7 @@ void loop() {
       else if ((PS4.Cross()) && (digitalRead(34))){ // Not kadhlay for testing. LIMIT SWITCH lavla ki parat taaka.
         // Lagori Lift down
         Serial.println("Cross");
-        ledcWrite(3, 160);
+        ledcWrite(3, 255);
         digitalWrite(lagori_lift_dir, LOW);
       }
       else if (PS4.L1()){ // Ball pass
