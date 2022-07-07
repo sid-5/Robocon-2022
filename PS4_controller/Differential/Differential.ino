@@ -27,273 +27,262 @@
 //library
 #include <PS4Controller.h>
 
-//macros for pin definations
-#define loco_dir1_pin 18
-#define loco_pwm1_pin 16  //RX2
-#define loco_dir2_pin 5
-#define loco_pwm2_pin 17  //TX2
+int conn = 0;
 
-#define lagori_grab_dir_pin 22
-#define lagori_grab_pwm_pin 19
+int pwm_high = 230;
+int pwm_low = 160;
 
-#define lagori_pick_dir_pin 23
-#define lagori_pick_pwm_pin 21
+int loco_dir1 = 5;
+int loco_pwm1 = 16; //RX2
+int loco_dir2 = 18;
+int loco_pwm2 = 17; //TX2
+ 
+int lagori_grab_dir = 22;
 
-//limit switch
-#define ls_1_pin 33  //release
-#define ls_2_pin 34  //grab
-#define ls_3_pin 13  //lift
-#define ls_4_pin 35
+int lagori_grab_pwm = 19;
 
-//variables to store state of ps4 elements
-int left_x = 0;
-int left_y = 0;
-int right_x = 0;
-int right_y = 0;
-byte r2 = 0;
-byte l2 = 0;
-byte r1 = 0;
-byte l1 = 0;
-byte square_button = 0;
-byte cross_button = 0;
-byte triangle_button = 0;
-byte circle_button = 0;
-byte battery = 0;
+int lagori_lift_dir = 23;
+int lagori_lift_pwm = 21;
 
-//variables for locomotion
-int M1_pwm = 0;
-byte M1_dir = 0;
-int M2_pwm = 0;
-byte M2_dir = 0;
+int ball_pass_dir = 26;
+int ball_pass_pwm = 27;
 
-//variables for lagori
-byte lagoriPick_pwm = 0;
-byte lagoriPick_dir = 0;
-byte lagoriGrab_pwm = 0;
-byte lagoriGrab_dir = 0;
+int ball_pick_dir = 25;
+int ball_pick_pwm = 32;
 
-//limit switch
-byte ls_1 = 0;
-byte ls_2 = 0;
-byte ls_3 = 0;
-byte ls_4 = 0;
-
+int curr_pwm = 0;
+bool grab_flag = 0;
+bool ball_pick_flag = 0;
+int action = 0;
+int prev_time = 0;
 //-----------------------------------------------------------------------------------------------//
 
 void setup() {
+  // put your setup code here, to run once:
+  ledcSetup(0, 5000, 8); //loco1 
+  ledcSetup(1, 5000, 8); //loco2
+  ledcAttachPin(loco_pwm1, 0); //RX2
+  ledcAttachPin(loco_pwm2, 1); //TX2
+  pinMode(loco_dir1, OUTPUT); //loco1_dir D5
+  pinMode(loco_dir2, OUTPUT); // loco2_dir D18
+
+  ledcSetup(2, 5000, 8); // Lagori Grab
+  ledcSetup(3, 5000, 8); // Lagori Lift
+
+  ledcAttachPin(lagori_grab_pwm, 2); // D19 -> Lagori Grab
+  ledcAttachPin(lagori_lift_pwm, 3); // D21 -> Lagori Lift
+  pinMode(lagori_grab_dir, OUTPUT); // D22 -> Lagori Grab Dir
+  pinMode(lagori_lift_dir, OUTPUT); // D23 -> Lagori Lift Dir
+
+  ledcSetup(6, 5000, 8); // Ball Pass
+  ledcSetup(5, 5000, 8); // Ball Pick
+
+  ledcAttachPin(ball_pass_pwm, 5); // D27 -> Ball Pass
+  ledcAttachPin(ball_pick_pwm, 6); // D32 -> Ball Pick
+  pinMode(ball_pick_dir, OUTPUT); // D25 -> Ball Pick Dir
+  pinMode(ball_pass_dir, OUTPUT); // D26 -> Ball Pass Dir
+
+  pinMode(35, INPUT); // Top Limit Switch
+  pinMode(34, INPUT); // Bottom Limit Switch
+
+  
   Serial.begin(115200);
-
-  //mac address of blue ps4
   PS4.begin("54:8d:5a:88:d9:f1");
-
-  //mac address of red ps4
-  //PS4.begin("48:5f:99:09:76:b2");
-
-  //locomotion setup
-  ledcSetup(0, 5000, 8);            //loco1
-  ledcSetup(1, 5000, 8);            //loco2
-  ledcAttachPin(loco_pwm1_pin, 0);  //RX2
-  ledcAttachPin(loco_pwm2_pin, 1);  //TX2
-  pinMode(loco_dir1_pin, OUTPUT);   //loco1_dir D5
-  pinMode(loco_dir2_pin, OUTPUT);   // loco2_dir D18
-
-  //logori setup
-  ledcSetup(2, 5000, 8);                  // Lagori Grab
-  ledcSetup(3, 5000, 8);                  // Lagori Lift
-  ledcAttachPin(lagori_grab_pwm_pin, 2);  // D19 -> Lagori Grab
-  ledcAttachPin(lagori_pick_pwm_pin, 3);  // D21 -> Lagori Lift
-  pinMode(lagori_grab_dir_pin, OUTPUT);   // D22 -> Lagori Grab Dir
-  pinMode(lagori_pick_dir_pin, OUTPUT);   // D23 -> Lagori Lift Dir
-
-  pinMode(ls_1_pin, INPUT);
-  pinMode(ls_2_pin, INPUT);
-  pinMode(ls_3_pin, INPUT);
-  pinMode(ls_4_pin, INPUT);
-}
-
 //-----------------------------------------------------------------------------------------------//
+}
 
 void loop() {
-  readValues();
-
   if (PS4.isConnected()) {
-    calculateLocValues();
-    driveLocMotors();
-
-    calculateLagoriValues();
-    driveLagoriMotor();
-  } else {
-    M1_pwm = 0;
-    M2_pwm = 0;
-    driveLocMotors();
-
-    lagoriGrab_pwm = 0;
-    lagoriPick_pwm = 0;
-    driveLagoriMotor();
-  }
-  printValues();
-  sendValues();
-}
-
-//-----------------------------------------------------------------------------------------------//
-
-void calculateLocValues() {
-  // 1. mapped left_y joystick for translation and right_x for rotation - linear mapping
-  //M1_pwm = 2 * (left_y + right_x);
-  //M2_pwm = 2 * (left_y - right_x);
-
-  // 2. mapped left_x joystick for rotation and r2 for trottle and l2 for reverse -linear mapping
-  //M1_pwm = 2 * (((r2 + -l2) / 2) + left_x);
-  //M2_pwm = 2 * (((r2 + -l2) / 2) - left_x);
-
-
-  // 3. step mapping, haven't used equations cause need need to fine tune each situation
-  //cannot use both sticks simultaneously
-  if (((left_y > 27) || (left_y < -27)) && ((right_x < 27) && (right_x > -27))) {
-    //forward
-    if (left_y > 77) {
-      M1_pwm = 255;
-      M2_pwm = 255;
-    } else if (left_y > 27 && left_y < 77) {
-      M1_pwm = 150;
-      M2_pwm = 150;
+    if (100>PS4.LStickY() && PS4.LStickY()>25){
+      ledcWrite(0, pwm_low);
+      ledcWrite(1, pwm_low);
+      digitalWrite(loco_dir1, LOW);
+      digitalWrite(loco_dir2, LOW); 
+      Serial.print("In ");
+      Serial.println(PS4.LStickY()); 
     }
-    //reverse
-    else if (left_y < -27 && left_y > -77) {
-      M1_pwm = -150;
-      M2_pwm = -150;
-    } else if (left_y < -77) {
-      M1_pwm = -255;
-      M2_pwm = -255;
+    else if (100<PS4.LStickY()){
+      ledcWrite(0, pwm_high);
+      ledcWrite(1, pwm_high);
+      digitalWrite(loco_dir1, LOW);
+      digitalWrite(loco_dir2, LOW);  
+      Serial.println(PS4.LStickY());
     }
-  } else if (((left_y < 27) && (left_y > -27)) && ((right_x > 27) || (right_x < -27))) {
-    //right
-    if (right_x > 77) {
-      M1_pwm = 255;
-      M2_pwm = -255;
-    } else if (right_x > 27 && right_x < 77) {
-      M1_pwm = 150;
-      M2_pwm = -150;
+    else if (-100<PS4.LStickY() && PS4.LStickY()<-25){
+      ledcWrite(0, pwm_low);
+      ledcWrite(1, pwm_low);  
+      digitalWrite(loco_dir1, HIGH);
+      digitalWrite(loco_dir2, HIGH); 
+      Serial.println(PS4.LStickY());
     }
-    //left
-    else if (right_x < -27 && right_x > -77) {
-      M1_pwm = -150;
-      M2_pwm = 150;
-    } else if (right_x < -77) {
-      M1_pwm = -255;
-      M2_pwm = 255;
+    else if (-100>PS4.LStickY()) {
+      ledcWrite(0, pwm_high);
+      ledcWrite(1, pwm_high);
+      digitalWrite(loco_dir1, HIGH);
+      digitalWrite(loco_dir2, HIGH); 
+      Serial.println(PS4.LStickY());
     }
-  } else {
-    M1_pwm = 0;
-    M2_pwm = 0;
+    else if (100>PS4.RStickX() && PS4.RStickX()>25){
+      ledcWrite(0, pwm_low);
+      ledcWrite(1, pwm_low);
+      digitalWrite(loco_dir1, HIGH);
+      digitalWrite(loco_dir2, LOW);
+      Serial.println(PS4.RStickX()); 
+    }
+    else if (100<PS4.RStickX()){
+      ledcWrite(0, pwm_high);
+      ledcWrite(1, pwm_high);
+      digitalWrite(loco_dir1, HIGH);
+      digitalWrite(loco_dir2, LOW); 
+      Serial.println(PS4.RStickX());
+    }
+    else if (-100<PS4.RStickX() && PS4.RStickX()<-25){
+      ledcWrite(0, pwm_low);
+      ledcWrite(1, pwm_low);
+      digitalWrite(loco_dir1, LOW);
+      digitalWrite(loco_dir2, HIGH);
+      Serial.println(PS4.RStickX()); 
+    }
+    else if (-100>PS4.RStickX()){
+      ledcWrite(0, pwm_high);
+      ledcWrite(1, pwm_high);
+      digitalWrite(loco_dir1, LOW);
+      digitalWrite(loco_dir2, HIGH); 
+      Serial.println(PS4.RStickX());
+    }      
+    else{
+      ledcWrite(0, 0);
+      ledcWrite(1, 0);
+    }
+
+    if (PS4.Up()){
+      Serial.println("UP");
+      action = 1;
+      prev_time=millis();
+    }
+    else if (PS4.Down()){
+      action = -1;
+      prev_time=millis();
+    }
+    else if (PS4.Left()){
+      action = 3;
+      prev_time=millis();
+    }
+    else if (PS4.Right()){
+      action = 2;
+      prev_time=millis();
+    }
+
+    if (PS4.L1()) {
+      Serial.println("L1");
+      ledcWrite(2, 100);
+      digitalWrite(lagori_grab_dir, LOW);
+      curr_pwm = 120;
+      grab_flag = 1;
+    }
+    else if (PS4.R1()) {
+      Serial.println("R1");
+      ledcWrite(2, 100);
+      digitalWrite(lagori_grab_dir, HIGH);
+      curr_pwm = 120;
+      grab_flag = 1;
+    }
+    else if (PS4.L2() && (digitalRead(13))) { //&& (digitalRead(35))
+      Serial.println("L2");
+      ledcWrite(3, 255);
+      digitalWrite(lagori_lift_dir, LOW);
+    }
+    else if (PS4.R2()) {
+      Serial.println("R2");
+      ledcWrite(3, 255);
+      digitalWrite(lagori_lift_dir, HIGH);
+    }
+    else if (PS4.Triangle()){ // Ball pass
+      Serial.println("Triangle");
+      ledcWrite(5, 20);
+      digitalWrite(ball_pass_dir, LOW);
+    }
+    else if (PS4.Cross()){ // Ball Pass
+      Serial.println("Cross");
+      ledcWrite(5, 20);
+      digitalWrite(ball_pass_dir, HIGH);
+    }
+    else if ((PS4.Circle()) ){ // ball pick
+      Serial.println("Circle");
+//      ledcWrite(4, 160);
+//      digitalWrite(ball_pick_dir, LOW);
+      if (ball_pick_flag==0){
+        ball_pick_flag=1;
+      }
+      else{
+        ball_pick_flag=0;
+      }
+      if (ball_pick_flag){
+        ledcWrite(6, 160);
+        Serial.println(ball_pick_flag);
+      }
+      else{
+        ledcWrite(6, 0);
+        ball_pick_flag = 0;
+        //Serial.println("0");
+      }
+    } 
+    else{
+      ledcWrite(2, 0);
+      ledcWrite(3, 0);
+      // ledcWrite(4, 0);
+      ledcWrite(5, 0);
+      grab_flag = 0;    
+    }
+    if (action==1) {
+      if (millis()-prev_time<1000) {
+        digitalWrite(lagori_lift_dir,HIGH);
+        Serial.println(action);
+        ledcWrite(3,255);
+        //prev_time = millis();
+      }
+      else{
+        action=0;
+        ledcWrite(3, 0);
+      }
+    }
+    else if (action==2) {
+      // int prev_time=millis();
+      if (millis()-prev_time<2000) {
+        digitalWrite(lagori_lift_dir,HIGH);
+        Serial.println(action);
+        ledcWrite(3,255);
+        // prev_time = millis();
+      }
+      else{
+        action=0;
+        ledcWrite(3, 0);
+      }
+    }
+    else if (action==3) {
+//      int prev_time=millis();
+      if (millis()-prev_time<3000) {
+        digitalWrite(lagori_lift_dir,HIGH);
+        Serial.println(action);
+        ledcWrite(3,255);
+        // prev_time = millis();
+      }
+      else{
+        action=0;
+        ledcWrite(3, 0);
+      }
+    }
+    else if (action==-1){
+      if (!digitalRead(13)){
+        digitalWrite(lagori_lift_dir,LOW);
+        Serial.println(action);
+        ledcWrite(3,255);
+      }
+      else{
+        ledcWrite(3, 0);
+        action=0;
+      }
+    }
   }
-
-  //direction deduction from mapped pwm values
-  //dir = 0 bot moves forward
-  if (M1_pwm > 0) {
-    M1_dir = 0;
-  } else {
-    M1_dir = 1;
-    M1_pwm = abs(M1_pwm);
-  }
-
-  if (M2_pwm > 0) {
-    M2_dir = 0;
-  } else {
-    M2_dir = 1;
-    M2_pwm = abs(M2_pwm);
-  }
-
-  M1_pwm = constrain(M1_pwm, 0, 255);
-  M2_pwm = constrain(M2_pwm, 0, 255);
+  delay(50);
 }
-
-//-----------------------------------------------------------------------------------------------//
-
-void driveLocMotors() {
-  //at dir = 0 bot moves forward
-  digitalWrite(loco_dir1_pin, M1_dir);
-  ledcWrite(0, M1_pwm);
-
-  digitalWrite(loco_dir2_pin, M2_dir);
-  ledcWrite(1, M2_pwm);
-}
-
-//-----------------------------------------------------------------------------------------------//
-
-void calculateLagoriValues() {
-  //r1 and l1 = 1 => button is pressed
-  //ls_1 and ls_4 = 0 => limit switch triggered
-
-  //lagoriGrab_pwm = 150 * (!l1 & r1 & ls_2) | (l1 & !r1 & ls_1);
-  lagoriGrab_pwm = 100 * ((!l1 & r1) | (l1 & !r1 & ls_1));  //limt switch 2 not working
-
-  lagoriGrab_dir = r1;  //dir = 1, lagori is grabbed
-
-  lagoriPick_pwm = 255 * ((!r2 & l2) | (r2 & !l2 & ls_3));
-  lagoriPick_dir = l2;  // dir = 0, lagori is picked up
-}
-
-//-----------------------------------------------------------------------------------------------//
-
-void driveLagoriMotor() {
-  ledcWrite(2, lagoriGrab_pwm);
-  digitalWrite(lagori_grab_dir_pin, lagoriGrab_dir);
-
-  ledcWrite(3, lagoriPick_pwm);
-  digitalWrite(lagori_pick_dir_pin, lagoriPick_dir);
-}
-
-//-----------------------------------------------------------------------------------------------//
-
-void readValues() {
-  left_x = PS4.LStickX();
-  left_y = PS4.LStickY();
-
-  right_x = PS4.RStickX();
-  right_y = PS4.RStickY();
-
-  r2 = PS4.R2();
-  l2 = PS4.L2();
-
-  r1 = PS4.R1();
-  l1 = PS4.L1();
-
-  circle_button = PS4.Circle();
-  square_button = PS4.Square();
-  triangle_button = PS4.Triangle();
-  cross_button = PS4.Cross();
-
-  battery = PS4.Battery();
-
-  ls_1 = digitalRead(ls_1_pin);
-  ls_2 = digitalRead(ls_2_pin);
-  ls_3 = digitalRead(ls_3_pin);
-  ls_4 = digitalRead(ls_4_pin);
-}
-
-//-----------------------------------------------------------------------------------------------//
-
-void printValues() {
-  Serial.print("\t");
-  Serial.print(ls_1);
-  Serial.print("\t");
-  Serial.print(ls_2);
-  Serial.print("\t");
-  Serial.print(ls_3);
-  Serial.print("\t");
-  Serial.print(lagoriGrab_pwm);
-  Serial.print("\t");
-  Serial.print(lagoriPick_pwm);
-  Serial.print("\t");
-  Serial.println(battery);
-}
-
-//-----------------------------------------------------------------------------------------------//
-
-void sendValues() {
-  PS4.setLed(0, 255, 255);
-  PS4.sendToController();
-}
-
-//-----------------------------------------------------------------------------------------------//
