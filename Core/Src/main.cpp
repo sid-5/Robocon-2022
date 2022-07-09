@@ -217,15 +217,15 @@ public:
 	void left() {
 		HAL_GPIO_WritePin(left_p, left_dir, GPIO_PIN_SET);
 		HAL_GPIO_WritePin(right_p, right_dir, GPIO_PIN_SET);
-		__HAL_TIM_SET_COMPARE(left_tim, left_chnl, pwm);
-		__HAL_TIM_SET_COMPARE(right_tim, right_chnl, pwm);
+		__HAL_TIM_SET_COMPARE(left_tim, left_chnl, 50);
+		__HAL_TIM_SET_COMPARE(right_tim, right_chnl, 100);
 	}
 
 	void right() {
 		HAL_GPIO_WritePin(left_p, left_dir, GPIO_PIN_RESET);
 		HAL_GPIO_WritePin(right_p, right_dir, GPIO_PIN_RESET);
-		__HAL_TIM_SET_COMPARE(left_tim, left_chnl, pwm);
-		__HAL_TIM_SET_COMPARE(right_tim, right_chnl, pwm);
+		__HAL_TIM_SET_COMPARE(left_tim, left_chnl, 200);
+		__HAL_TIM_SET_COMPARE(right_tim, right_chnl,100);
 	}
 
 	void stop() {
@@ -408,11 +408,19 @@ int main(void) {
 		//left // Button Left
 		else if (rxData[0] == 3) {
 			low.left();
+//			HAL_GPIO_WritePin(GPIOD, LOCO_DIR1_Pin, GPIO_PIN_SET);
+//					HAL_GPIO_WritePin(GPIOD, LOCO_DIR2_Pin, GPIO_PIN_SET);
+//					__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, 50);
+//					__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_2, 30);
 		}
 
 		//right // Button Rights
 		else if (rxData[0] == 4) {
 			low.right();
+//			HAL_GPIO_WritePin(GPIOD, LOCO_DIR1_Pin, GPIO_PIN_SET);
+//					HAL_GPIO_WritePin(GPIOD, LOCO_DIR2_Pin, GPIO_PIN_SET);
+//					__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, 30);
+//					__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_2, 50);
 		} else if (rxData[0] == 14) //up//Button Up
 				{
 			high.forward();
@@ -426,11 +434,19 @@ int main(void) {
 		//left // Button Left
 		else if (rxData[0] == 20) {
 			high.left();
+//			HAL_GPIO_WritePin(GPIOD, LOCO_DIR1_Pin, GPIO_PIN_SET);
+//					HAL_GPIO_WritePin(GPIOD, LOCO_DIR2_Pin, GPIO_PIN_SET);
+//					__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, 80);
+//					__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_2, 50);
 		}
 
 		//right // Button Rights
 		else if (rxData[0] == 18) {
 			high.right();
+//			HAL_GPIO_WritePin(GPIOD, LOCO_DIR1_Pin, GPIO_PIN_SET);
+//					HAL_GPIO_WritePin(GPIOD, LOCO_DIR2_Pin, GPIO_PIN_SET);
+//					__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, 50);
+//					__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_2, 80);
 		} else if (rxData[0] == 15) //up//Button Up
 				{
 			low.forward();
