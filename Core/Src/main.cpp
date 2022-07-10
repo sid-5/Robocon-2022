@@ -40,6 +40,8 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+I2C_HandleTypeDef hi2c2;
+
 TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
@@ -67,6 +69,7 @@ static void MX_TIM9_Init(void);
 static void MX_TIM5_Init(void);
 static void MX_TIM10_Init(void);
 static void MX_TIM3_Init(void);
+static void MX_I2C2_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -202,7 +205,7 @@ public:
 
 	void forward() {
 		HAL_GPIO_WritePin(left_p, left_dir, GPIO_PIN_RESET);
-				HAL_GPIO_WritePin(right_p, right_dir, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(right_p, right_dir, GPIO_PIN_SET);
 		__HAL_TIM_SET_COMPARE(left_tim, left_chnl, pwm);
 		__HAL_TIM_SET_COMPARE(right_tim, right_chnl, pwm);
 	}
@@ -225,7 +228,7 @@ public:
 		HAL_GPIO_WritePin(left_p, left_dir, GPIO_PIN_RESET);
 		HAL_GPIO_WritePin(right_p, right_dir, GPIO_PIN_RESET);
 		__HAL_TIM_SET_COMPARE(left_tim, left_chnl, 200);
-		__HAL_TIM_SET_COMPARE(right_tim, right_chnl,100);
+		__HAL_TIM_SET_COMPARE(right_tim, right_chnl, 100);
 	}
 
 	void stop() {
@@ -355,20 +358,25 @@ int main(void) {
 	MX_TIM5_Init();
 	MX_TIM10_Init();
 	MX_TIM3_Init();
+	MX_I2C2_Init();
 	/* USER CODE BEGIN 2 */
-	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);  //Locomotion
-	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2);  //Locomotion
-	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_3);  //Passing
-	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_4);  //Lifting
-	HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_1);  //BLDC1
-	HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_2);  //BLDC2
-	HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_3);  //Servo
-	HAL_TIM_PWM_Start(&htim10, TIM_CHANNEL_1);  //Stepper
-	HAL_TIM_IC_Start_IT(&htim1, TIM_CHANNEL_1);  //Encoder
+	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1); //Locomotion
+	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2); //Locomotion
+
+	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_3); //Passing
+	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_4); //Lifting
+
+	HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_1); //BLDC1
+	HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_2); //BLDC2
+	HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_3); //Servo
+
+	HAL_TIM_PWM_Start(&htim10, TIM_CHANNEL_1); //Stepper
+
+	HAL_TIM_IC_Start_IT(&htim1, TIM_CHANNEL_1); //Encoder
 	HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_1);
+
 	HAL_TIM_Base_Start_IT(&htim9);
 	HAL_UART_Receive_DMA(&huart1, (uint8_t*) rxData, 1);
-
 	Loco low = Loco(&htim4, TIM_CHANNEL_1, GPIOD, LOCO_DIR1_Pin, &htim4,
 	TIM_CHANNEL_2, LOCO_DIR2_Pin, GPIOD, 60);
 	Loco high = Loco(&htim4, TIM_CHANNEL_1, GPIOD, LOCO_DIR1_Pin, &htim4,
@@ -376,12 +384,7 @@ int main(void) {
 	__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_4, 50);
 	__HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_1, 0); //bldc default 030:94:35:32:df:3e
 	__HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_2, 0);
-	__HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_3, 50);
-
-	HAL_GPIO_WritePin(GPIOE, Laser_pointer_Pin, GPIO_PIN_SET);
 	////////////////////////////
-
-	__HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_2, 100);
 	__HAL_TIM_SET_COMPARE(&htim10, TIM_CHANNEL_1, 0);
 	/* USER CODE END 2 */
 
@@ -391,6 +394,8 @@ int main(void) {
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */
+
+
 		if (rxData[0] == 13 && laserDebounce == 0) {
 			laser();
 
@@ -408,19 +413,19 @@ int main(void) {
 		//left // Button Left
 		else if (rxData[0] == 3) {
 			low.left();
-//			HAL_GPIO_WritePin(GPIOD, LOCO_DIR1_Pin, GPIO_PIN_SET);
-//					HAL_GPIO_WritePin(GPIOD, LOCO_DIR2_Pin, GPIO_PIN_SET);
-//					__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, 50);
-//					__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_2, 30);
+			//			HAL_GPIO_WritePin(GPIOD, LOCO_DIR1_Pin, GPIO_PIN_SET);
+			//					HAL_GPIO_WritePin(GPIOD, LOCO_DIR2_Pin, GPIO_PIN_SET);
+			//					__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, 50);
+			//					__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_2, 30);
 		}
 
 		//right // Button Rights
 		else if (rxData[0] == 4) {
 			low.right();
-//			HAL_GPIO_WritePin(GPIOD, LOCO_DIR1_Pin, GPIO_PIN_SET);
-//					HAL_GPIO_WritePin(GPIOD, LOCO_DIR2_Pin, GPIO_PIN_SET);
-//					__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, 30);
-//					__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_2, 50);
+			//			HAL_GPIO_WritePin(GPIOD, LOCO_DIR1_Pin, GPIO_PIN_SET);
+			//					HAL_GPIO_WritePin(GPIOD, LOCO_DIR2_Pin, GPIO_PIN_SET);
+			//					__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, 30);
+			//					__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_2, 50);
 		} else if (rxData[0] == 14) //up//Button Up
 				{
 			high.forward();
@@ -434,19 +439,19 @@ int main(void) {
 		//left // Button Left
 		else if (rxData[0] == 20) {
 			high.left();
-//			HAL_GPIO_WritePin(GPIOD, LOCO_DIR1_Pin, GPIO_PIN_SET);
-//					HAL_GPIO_WritePin(GPIOD, LOCO_DIR2_Pin, GPIO_PIN_SET);
-//					__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, 80);
-//					__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_2, 50);
+			//			HAL_GPIO_WritePin(GPIOD, LOCO_DIR1_Pin, GPIO_PIN_SET);
+			//					HAL_GPIO_WritePin(GPIOD, LOCO_DIR2_Pin, GPIO_PIN_SET);
+			//					__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, 80);
+			//					__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_2, 50);
 		}
 
 		//right // Button Rights
 		else if (rxData[0] == 18) {
 			high.right();
-//			HAL_GPIO_WritePin(GPIOD, LOCO_DIR1_Pin, GPIO_PIN_SET);
-//					HAL_GPIO_WritePin(GPIOD, LOCO_DIR2_Pin, GPIO_PIN_SET);
-//					__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, 50);
-//					__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_2, 80);
+			//			HAL_GPIO_WritePin(GPIOD, LOCO_DIR1_Pin, GPIO_PIN_SET);
+			//					HAL_GPIO_WritePin(GPIOD, LOCO_DIR2_Pin, GPIO_PIN_SET);
+			//					__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, 50);
+			//					__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_2, 80);
 		} else if (rxData[0] == 15) //up//Button Up
 				{
 			low.forward();
@@ -481,26 +486,29 @@ int main(void) {
 
 		//toggle linear actuator down  //Button L1
 		else if (rxData[0] == 7) {
-			VerticalMotor(1);
+			start_stepper = 1;
+			stepper();
 
 		}
 
 		//toggle linear actuator up	  //Button R1
 		else if (rxData[0] == 9) { //&& !HAL_GPIO_ReadPin(GPIOE, Limit_switch_input_Pin) {
-			VerticalMotor(0);
+			VerticalMotor(1);
 		}
 
 		//BLDC ON //Button L2
 		else if (rxData[0] == 8) {
 
 			if (countBldc == 0 && bldcDebounce == 0) {
-				HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, GPIO_PIN_SET);
-				HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, GPIO_PIN_SET);
+
+				__HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_1, 800);
+				__HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_2, 800);
+
 				countBldc = 1;
 				bldcDebounce = 5;
 			} else if (countBldc == 1 && bldcDebounce == 0) {
-				HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, GPIO_PIN_RESET);
-				HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, GPIO_PIN_RESET);
+				__HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_1, 0);
+				__HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_2, 0);
 				countBldc = 0;
 				bldcDebounce = 5;
 			}
@@ -509,16 +517,15 @@ int main(void) {
 
 		// Stepper 90 deg//Button R2
 		else if (rxData[0] == 10) {
-			start_stepper = 1;
-			stepper();
+			VerticalMotor(0);
 		}
 		//Lifting Up //Button Triangle
-		else if (rxData[0] == 11){// && !HAL_GPIO_ReadPin(GPIOE, Limit_switch_input1_Pin)) {
+		else if (rxData[0] == 11) { // && !HAL_GPIO_ReadPin(GPIOE, Limit_switch_input1_Pin)) {
 			HAL_GPIO_WritePin(GPIOD, LiftingMotor_DIR_Pin, GPIO_PIN_SET);
 			__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_4, 70);
 		}
 		//Lifting Down// Button Cross
-		else if (rxData[0] == 12){// && !HAL_GPIO_ReadPin(GPIOE, Liimit_switch_input2_Pin)) {
+		else if (rxData[0] == 12) { // && !HAL_GPIO_ReadPin(GPIOE, Liimit_switch_input2_Pin)) {
 			HAL_GPIO_WritePin(GPIOD, LiftingMotor_DIR_Pin, GPIO_PIN_RESET);
 			__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_4, 70);
 
@@ -527,8 +534,6 @@ int main(void) {
 			//			HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_RESET);
 			//			HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
 			__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_4, 0); //lifting 0
-			__HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_1, 0); //BLDC 0
-			__HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_2, 0); //BLDC 0
 			__HAL_TIM_SET_COMPARE(&htim10, TIM_CHANNEL_1, 0); //stepper to zero
 
 		}
@@ -575,6 +580,38 @@ void SystemClock_Config(void) {
 	if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK) {
 		Error_Handler();
 	}
+}
+
+/**
+ * @brief I2C2 Initialization Function
+ * @param None
+ * @retval None
+ */
+static void MX_I2C2_Init(void) {
+
+	/* USER CODE BEGIN I2C2_Init 0 */
+
+	/* USER CODE END I2C2_Init 0 */
+
+	/* USER CODE BEGIN I2C2_Init 1 */
+
+	/* USER CODE END I2C2_Init 1 */
+	hi2c2.Instance = I2C2;
+	hi2c2.Init.ClockSpeed = 100000;
+	hi2c2.Init.DutyCycle = I2C_DUTYCYCLE_2;
+	hi2c2.Init.OwnAddress1 = 0;
+	hi2c2.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+	hi2c2.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+	hi2c2.Init.OwnAddress2 = 0;
+	hi2c2.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+	hi2c2.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+	if (HAL_I2C_Init(&hi2c2) != HAL_OK) {
+		Error_Handler();
+	}
+	/* USER CODE BEGIN I2C2_Init 2 */
+
+	/* USER CODE END I2C2_Init 2 */
+
 }
 
 /**
@@ -834,6 +871,14 @@ static void MX_TIM5_Init(void) {
 	sConfigOC.Pulse = 0;
 	sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
 	sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+	if (HAL_TIM_PWM_ConfigChannel(&htim5, &sConfigOC, TIM_CHANNEL_1)
+			!= HAL_OK) {
+		Error_Handler();
+	}
+	if (HAL_TIM_PWM_ConfigChannel(&htim5, &sConfigOC, TIM_CHANNEL_2)
+			!= HAL_OK) {
+		Error_Handler();
+	}
 	if (HAL_TIM_PWM_ConfigChannel(&htim5, &sConfigOC, TIM_CHANNEL_3)
 			!= HAL_OK) {
 		Error_Handler();
@@ -979,33 +1024,31 @@ static void MX_GPIO_Init(void) {
 
 	/* GPIO Ports Clock Enable */
 	__HAL_RCC_GPIOE_CLK_ENABLE();
-	__HAL_RCC_GPIOC_CLK_ENABLE();
 	__HAL_RCC_GPIOA_CLK_ENABLE();
+	__HAL_RCC_GPIOC_CLK_ENABLE();
 	__HAL_RCC_GPIOB_CLK_ENABLE();
 	__HAL_RCC_GPIOD_CLK_ENABLE();
 
 	/*Configure GPIO pin Output Level */
 	HAL_GPIO_WritePin(GPIOE,
-			Laser1_en_Pin | GPIO2_2_Pin | Laser_pointer_Pin | GPIO3_2_Pin,
+	GPIO1_1_Pin | GPIO2_2_Pin | GPIO3_2_Pin | GPIO3_1_Pin, GPIO_PIN_RESET);
+
+	/*Configure GPIO pin Output Level */
+	HAL_GPIO_WritePin(LinearActuator_en_GPIO_Port, LinearActuator_en_Pin,
 			GPIO_PIN_RESET);
 
 	/*Configure GPIO pin Output Level */
-	HAL_GPIO_WritePin(GPIOC,
-			BLDC_1_Pin | BLDC_2_Pin | Motor3_DIR1_Pin | LinearActuator_dir_Pin
-					| LinearActuator_EN_Pin | LinearActuator_DIR1_Pin
-					| LinearActuator_DIR2_Pin, GPIO_PIN_RESET);
-
-	/*Configure GPIO pin Output Level */
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0 | GPIO_PIN_1 | LinearActuator_en_Pin,
+	HAL_GPIO_WritePin(GPIOC, Motor3_DIR1_Pin | LinearActuator_dir_Pin,
 			GPIO_PIN_RESET);
 
 	/*Configure GPIO pin Output Level */
-	HAL_GPIO_WritePin(GPIOB, laser1_Pin | STEPPER_DIR_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOB, laser1_Pin | laser2_Pin | STEPPER_DIR_Pin,
+			GPIO_PIN_RESET);
 
 	/*Configure GPIO pin Output Level */
 	HAL_GPIO_WritePin(GPIOD,
-			PassingMotor_DIR_Pin | LOCO_DIR2_Pin | LOCO_DIR1_Pin
-					| LiftingMotor_DIR_Pin, GPIO_PIN_RESET);
+	PassingMotor_DIR_Pin | LOCO_DIR2_Pin | LOCO_DIR1_Pin | LiftingMotor_DIR_Pin,
+			GPIO_PIN_RESET);
 
 	/*Configure GPIO pins : Limit_switch_input1_Pin Liimit_switch_input2_Pin */
 	GPIO_InitStruct.Pin = Limit_switch_input1_Pin | Liimit_switch_input2_Pin;
@@ -1013,33 +1056,29 @@ static void MX_GPIO_Init(void) {
 	GPIO_InitStruct.Pull = GPIO_PULLUP;
 	HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
-	/*Configure GPIO pins : Laser1_en_Pin GPIO2_2_Pin Laser_pointer_Pin GPIO3_2_Pin */
-	GPIO_InitStruct.Pin = Laser1_en_Pin | GPIO2_2_Pin | Laser_pointer_Pin
-			| GPIO3_2_Pin;
+	/*Configure GPIO pins : GPIO1_1_Pin GPIO2_2_Pin GPIO3_2_Pin GPIO3_1_Pin */
+	GPIO_InitStruct.Pin = GPIO1_1_Pin | GPIO2_2_Pin | GPIO3_2_Pin | GPIO3_1_Pin;
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 	HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
-	/*Configure GPIO pins : BLDC_1_Pin BLDC_2_Pin Motor3_DIR1_Pin LinearActuator_dir_Pin
-	 LinearActuator_EN_Pin LinearActuator_DIR1_Pin LinearActuator_DIR2_Pin */
-	GPIO_InitStruct.Pin = BLDC_1_Pin | BLDC_2_Pin | Motor3_DIR1_Pin
-			| LinearActuator_dir_Pin | LinearActuator_EN_Pin
-			| LinearActuator_DIR1_Pin | LinearActuator_DIR2_Pin;
+	/*Configure GPIO pin : LinearActuator_en_Pin */
+	GPIO_InitStruct.Pin = LinearActuator_en_Pin;
+	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+	HAL_GPIO_Init(LinearActuator_en_GPIO_Port, &GPIO_InitStruct);
+
+	/*Configure GPIO pins : Motor3_DIR1_Pin LinearActuator_dir_Pin */
+	GPIO_InitStruct.Pin = Motor3_DIR1_Pin | LinearActuator_dir_Pin;
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 	HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-	/*Configure GPIO pins : PA0 PA1 LinearActuator_en_Pin */
-	GPIO_InitStruct.Pin = GPIO_PIN_0 | GPIO_PIN_1 | LinearActuator_en_Pin;
-	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIO_InitStruct.Pull = GPIO_NOPULL;
-	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-	/*Configure GPIO pins : laser1_Pin STEPPER_DIR_Pin */
-	GPIO_InitStruct.Pin = laser1_Pin | STEPPER_DIR_Pin;
+	/*Configure GPIO pins : laser1_Pin laser2_Pin STEPPER_DIR_Pin */
+	GPIO_InitStruct.Pin = laser1_Pin | laser2_Pin | STEPPER_DIR_Pin;
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
