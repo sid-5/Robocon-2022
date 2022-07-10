@@ -30,6 +30,14 @@ int pass_flag = 0;
 
 int action = 0;
 int prev_time = 0;
+
+int bottom_limit = 34;
+int upper_limit = 35;
+int grabber_limit = 33;
+
+int red = 2;
+int blue = 4;
+int green = 14;
 //-----------------------------------------------------------------------------------------------//
 Lagorifunc l(2,lagori_grab_pwm,lagori_grab_dir,3, lagori_lift_pwm,lagori_lift_dir,5000,8);
 Loco high(0, m1_pwm, m1_dir, 1, m2_pwm, m2_dir, 5000, 8, 230);
@@ -45,31 +53,53 @@ void setup() {
   ledcAttachPin(ball_pick_pwm, 4); // D32 -> Ball Pick
   pinMode(ball_pick_dir, OUTPUT); // D25 -> Ball Pick Dir
   pinMode(ball_pass_dir, OUTPUT); // D26 -> Ball Pass Dir
+  pinMode(red, OUTPUT);
+  pinMode(blue, OUTPUT);
+  pinMode(green, OUTPUT);
   Serial.begin(115200);
   PS4.begin("54:8d:5a:88:d9:f1");
-  pinMode(35, INPUT); // Top Limit Switch
-  pinMode(34, INPUT); // Bottom Limit Switch
+  pinMode(upper_limit, INPUT); // Top Limit Switch
+  pinMode(bottom_limit, INPUT); // Bottom Limit Switch
+  pinMode(grabber_limit,INPUT); // horizontal Limit Switch
 }
 
 void loop() {
   if (PS4.isConnected()) {
     if (100>PS4.LStickY() && PS4.LStickY()>25){
       low.forward();
+      digitalWrite(red,HIGH);
+      digitalWrite(blue,LOW);
+      digitalWrite(green,LOW);
     }
     else if (100<PS4.LStickY()){
       high.forward();
+       digitalWrite(red,LOW);
+      digitalWrite(blue,HIGH);
+      digitalWrite(green,LOW);
     }
     else if (-100<PS4.LStickY() && PS4.LStickY()<-25){
       low.backward();
+      digitalWrite(red,LOW);
+      digitalWrite(blue,LOW);
+      digitalWrite(green,HIGH);
     }
     else if (-100>PS4.LStickY()) {
       high.backward();
+      digitalWrite(red,HIGH);
+      digitalWrite(blue,HIGH);
+      digitalWrite(green,LOW);
     }
     else if (100>PS4.RStickX() && PS4.RStickX()>25){
-      low.right();
+      low.left();
+      digitalWrite(red,HIGH);
+      digitalWrite(blue,LOW);
+      digitalWrite(green,HIGH);
     }
     else if (100<PS4.RStickX()){
       high.left();
+      digitalWrite(red,LOW);
+      digitalWrite(blue,HIGH);
+      digitalWrite(green,HIGH);
     }
     else if (-100<PS4.RStickX() && PS4.RStickX()<-25){
       low.right();
@@ -80,22 +110,24 @@ void loop() {
     else{
       low.allLocoZero();
       high.allLocoZero();
+      digitalWrite(blue,LOW);
+      digitalWrite(red,LOW);
+      digitalWrite(green,LOW);
     }
 
     /////////////////////////////////////////////////////////////////////////
-    if (PS4.L1()) {
+    if (PS4.L1() && (digitalRead(33))) {
       l.grab(0);
     }
-    else if (PS4.R1()) {
+    else if (PS4.R1()  && (digitalRead(35))) {
       l.grab(1);
     }
-    else if (PS4.L2()){// && (digitalRead(13))) { //&& (digitalRead(35))
+    else if (PS4.L2() && (digitalRead(34))) { 
       l.lift(0);
     }
     else if (PS4.R2()) {
       l.lift(1);
-    }
-    else if(PS4.Square()){    // ball pick
+
       if(!pass_flag && ((millis() - pass_time)>200)){
         ledcWrite(4, 50);
         pass_time = millis();
@@ -118,11 +150,13 @@ void loop() {
       
     } 
     else{
-      l.allLagoriZero();
+      if(!action){
+        l.allLagoriZero();
+      }
       ledcWrite(5, 0);    
     }
 
-    //semi automation
+    //////////////////////////////////////////////////////semi automation
     if(millis() - prev_time>1000){
     if (PS4.Up()){
       action = 2;
@@ -139,12 +173,17 @@ void loop() {
     else if (PS4.Right()){
       action = 3;
       prev_time=millis();
+    }else if (PS4.Circle()){
+      action = 5;
+      prev_time=millis();
     }
     }
 
+
+   ///////////////////////////////////////////////////////////////////////////////////////////
     switch(action){
       case 1:
-        if(millis() - prev_time>=1000){
+        if(millis() - prev_time>=1500){
           l.allLagoriZero();
           action = 0;
         }else{
@@ -152,7 +191,7 @@ void loop() {
         }
         break;
       case 2:
-        if(millis() - prev_time>=2000){
+        if(millis() - prev_time>=2400){
           l.allLagoriZero();
           action = 0;
         }else{
@@ -160,7 +199,7 @@ void loop() {
         }
         break;
       case 3:
-        if(millis() - prev_time>=2500){
+        if(millis() - prev_time>=3000){
           l.allLagoriZero();
           action = 0;
         }else{
@@ -168,7 +207,20 @@ void loop() {
         }
         break;
       case 4:
-        action = 0;
+        if(digitalRead(grabber_limit)){
+          l.lift(0);
+        }else{
+          l.allLagoriZero();
+          action = 0;
+        }
+        break;
+      case 5:
+        if(millis() - prev_time>=4100){
+          l.allLagoriZero();
+          action = 0;
+        }else{
+          l.lift(1);
+        }
         break;
     }
 }
