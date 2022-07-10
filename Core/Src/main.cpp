@@ -381,7 +381,6 @@ int main(void) {
 	TIM_CHANNEL_2, LOCO_DIR2_Pin, GPIOD, 60);
 	Loco high = Loco(&htim4, TIM_CHANNEL_1, GPIOD, LOCO_DIR1_Pin, &htim4,
 	TIM_CHANNEL_2, LOCO_DIR2_Pin, GPIOD, 80);
-	__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_4, 50);
 	__HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_1, 0); //bldc default 030:94:35:32:df:3e
 	__HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_2, 0);
 	////////////////////////////
@@ -413,19 +412,14 @@ int main(void) {
 		//left // Button Left
 		else if (rxData[0] == 3) {
 			low.left();
-			//			HAL_GPIO_WritePin(GPIOD, LOCO_DIR1_Pin, GPIO_PIN_SET);
-			//					HAL_GPIO_WritePin(GPIOD, LOCO_DIR2_Pin, GPIO_PIN_SET);
-			//					__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, 50);
-			//					__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_2, 30);
+
 		}
 
 		//right // Button Rights
 		else if (rxData[0] == 4) {
 			low.right();
-			//			HAL_GPIO_WritePin(GPIOD, LOCO_DIR1_Pin, GPIO_PIN_SET);
-			//					HAL_GPIO_WritePin(GPIOD, LOCO_DIR2_Pin, GPIO_PIN_SET);
-			//					__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, 30);
-			//					__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_2, 50);
+
+			//
 		} else if (rxData[0] == 14) //up//Button Up
 				{
 			high.forward();
@@ -439,19 +433,13 @@ int main(void) {
 		//left // Button Left
 		else if (rxData[0] == 20) {
 			high.left();
-			//			HAL_GPIO_WritePin(GPIOD, LOCO_DIR1_Pin, GPIO_PIN_SET);
-			//					HAL_GPIO_WritePin(GPIOD, LOCO_DIR2_Pin, GPIO_PIN_SET);
-			//					__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, 80);
-			//					__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_2, 50);
+
 		}
 
 		//right // Button Rights
 		else if (rxData[0] == 18) {
 			high.right();
-			//			HAL_GPIO_WritePin(GPIOD, LOCO_DIR1_Pin, GPIO_PIN_SET);
-			//					HAL_GPIO_WritePin(GPIOD, LOCO_DIR2_Pin, GPIO_PIN_SET);
-			//					__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_1, 50);
-			//					__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_2, 80);
+
 		} else if (rxData[0] == 15) //up//Button Up
 				{
 			low.forward();
@@ -531,8 +519,7 @@ int main(void) {
 
 		} else {
 			low.stop();
-			//			HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_RESET);
-			//			HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
+
 			__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_4, 0); //lifting 0
 			__HAL_TIM_SET_COMPARE(&htim10, TIM_CHANNEL_1, 0); //stepper to zero
 
