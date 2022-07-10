@@ -481,7 +481,9 @@ int main(void) {
 
 		//toggle linear actuator up	  //Button R1
 		else if (rxData[0] == 9) { //&& !HAL_GPIO_ReadPin(GPIOE, Limit_switch_input_Pin) {
-			VerticalMotor(1);
+			//VerticalMotor(1);
+			HAL_GPIO_WritePin(GPIOA, LinearActuator_en_Pin, GPIO_PIN_SET);
+					HAL_GPIO_WritePin(GPIOC, LinearActuator_dir_Pin, GPIO_PIN_SET);
 		}
 
 		//BLDC ON //Button L2
@@ -505,10 +507,12 @@ int main(void) {
 
 		// Stepper 90 deg//Button R2
 		else if (rxData[0] == 10) {
-			VerticalMotor(0);
+//			VerticalMotor(0);
+			HAL_GPIO_WritePin(GPIOA, LinearActuator_en_Pin, GPIO_PIN_SET);
+			HAL_GPIO_WritePin(GPIOC, LinearActuator_dir_Pin, GPIO_PIN_RESET);
 		}
 		//Lifting Up //Button Triangle
-		else if (rxData[0] == 11) { // && !HAL_GPIO_ReadPin(GPIOE, Limit_switch_input1_Pin)) {
+		else if (rxData[0] == 11 && HAL_GPIO_ReadPin(GPIOE, Limit_switch_input1_Pin)) {
 			HAL_GPIO_WritePin(GPIOD, LiftingMotor_DIR_Pin, GPIO_PIN_SET);
 			__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_4, 70);
 		}
@@ -519,7 +523,7 @@ int main(void) {
 
 		} else {
 			low.stop();
-
+			HAL_GPIO_WritePin(GPIOA, LinearActuator_en_Pin, GPIO_PIN_RESET);
 			__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_4, 0); //lifting 0
 			__HAL_TIM_SET_COMPARE(&htim10, TIM_CHANNEL_1, 0); //stepper to zero
 
