@@ -104,6 +104,8 @@ int passMotor = 0;
 int passDebounce = 0;
 int countLas = 0;
 int LasDebounce = 0;
+int bldc_pwm = 100;
+int x = 0;//test
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 //encoder feedback
@@ -393,8 +395,15 @@ int main(void) {
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */
+		x+=1;
+		if(x==100){
 
+		}
+		else if(x==200){
 
+		}else if(x==300){
+
+		}
 		if (rxData[0] == 13 && laserDebounce == 0) {
 			laser();
 
@@ -403,6 +412,19 @@ int main(void) {
 				{
 			low.forward();
 		}
+		else if (rxData[0] == 55 && debounce==0) {
+					if(bldc_pwm>0){
+						bldc_pwm = bldc_pwm-100;
+						debounce = 5;
+					}
+				}
+		else if (rxData[0] == 56 && debounce==0) {
+			if(bldc_pwm<1000){
+				bldc_pwm = bldc_pwm+100;
+				debounce = 5;
+			}
+
+				}
 
 		//Down // Button Down
 		else if (rxData[0] == 2) {
@@ -491,8 +513,8 @@ int main(void) {
 
 			if (countBldc == 0 && bldcDebounce == 0) {
 
-				__HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_1, 800);
-				__HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_2, 800);
+				__HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_1, bldc_pwm);
+				__HAL_TIM_SET_COMPARE(&htim5, TIM_CHANNEL_2, bldc_pwm);
 
 				countBldc = 1;
 				bldcDebounce = 5;
@@ -1109,6 +1131,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	if (start_stepper) {
 		stepperCount += 1;
 	}
+	x+=1;
+
 
 }
 /* USER CODE END 4 */
