@@ -104,7 +104,7 @@ int passMotor = 0;
 int passDebounce = 0;
 int countLas = 0;
 int LasDebounce = 0;
-int bldc_pwm = 100;
+int bldc_pwm = 675;
 int x = 0;//test
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -220,15 +220,15 @@ public:
 	}
 
 	void left() {
-		HAL_GPIO_WritePin(left_p, left_dir, GPIO_PIN_SET);
-		HAL_GPIO_WritePin(right_p, right_dir, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(left_p, left_dir, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(right_p, right_dir, GPIO_PIN_RESET);
 		__HAL_TIM_SET_COMPARE(left_tim, left_chnl, 50);
 		__HAL_TIM_SET_COMPARE(right_tim, right_chnl, 100);
 	}
 
 	void right() {
-		HAL_GPIO_WritePin(left_p, left_dir, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(right_p, right_dir, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(left_p, left_dir, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(right_p, right_dir, GPIO_PIN_SET);
 		__HAL_TIM_SET_COMPARE(left_tim, left_chnl, 200);
 		__HAL_TIM_SET_COMPARE(right_tim, right_chnl, 100);
 	}
@@ -245,7 +245,7 @@ public:
 //utilities
 void stepper() {
 	HAL_GPIO_WritePin(GPIOB, STEPPER_DIR_Pin, GPIO_PIN_SET);
-	while (stepperCount < 10) {
+	while (stepperCount < 9) {
 		__HAL_TIM_SET_COMPARE(&htim10, TIM_CHANNEL_1, 50);
 	}
 	start_stepper = 0;
@@ -271,7 +271,7 @@ void passingMotor() {
 	if (passMotor == 0 && passDebounce == 0) {
 		HAL_GPIO_WritePin(GPIOD, PassingMotor_DIR_Pin, GPIO_PIN_RESET);
 
-		__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_3, 50);
+		__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_3, 30);
 		passMotor = 1;
 		passDebounce = 5;
 	} else if (passMotor == 1 && passDebounce == 0) {
@@ -285,13 +285,13 @@ void passingMotor() {
 void laser() {
 	if (laserr == 0 && laserDebounce == 0) {
 		HAL_GPIO_WritePin(GPIOB, laser1_Pin, GPIO_PIN_SET);
-
+		HAL_GPIO_WritePin(GPIOB, laser2_Pin, GPIO_PIN_SET);
 		laserr = 1;
 		laserDebounce = 5;
 
 	} else if (laserr == 1 && laserDebounce == 0) {
 		HAL_GPIO_WritePin(GPIOB, laser1_Pin, GPIO_PIN_RESET);
-
+		HAL_GPIO_WritePin(GPIOB, laser2_Pin, GPIO_PIN_RESET);
 		laserr = 0;
 		laserDebounce = 5;
 	}
@@ -413,16 +413,18 @@ int main(void) {
 			low.forward();
 		}
 		else if (rxData[0] == 55 && debounce==0) {
-					if(bldc_pwm>0){
-						bldc_pwm = bldc_pwm-100;
-						debounce = 5;
-					}
+			bldc_pwm  =640;  //lagori break
+//					if(bldc_pwm>660){
+//						bldc_pwm = bldc_pwm-3;
+//						debounce = 5;
+//					}
 				}
 		else if (rxData[0] == 56 && debounce==0) {
-			if(bldc_pwm<1000){
-				bldc_pwm = bldc_pwm+100;
-				debounce = 5;
-			}
+			bldc_pwm = 660;  //BOH
+//			if(bldc_pwm<675){
+//				bldc_pwm = bldc_pwm+3;
+//				debounce = 5;
+//			}
 
 				}
 
@@ -536,12 +538,12 @@ int main(void) {
 		//Lifting Up //Button Triangle
 		else if (rxData[0] == 11 && HAL_GPIO_ReadPin(GPIOE, Limit_switch_input1_Pin)) {
 			HAL_GPIO_WritePin(GPIOD, LiftingMotor_DIR_Pin, GPIO_PIN_SET);
-			__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_4, 70);
+			__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_4, 90);
 		}
 		//Lifting Down// Button Cross
-		else if (rxData[0] == 12) { // && !HAL_GPIO_ReadPin(GPIOE, Liimit_switch_input2_Pin)) {
+		else if (rxData[0] == 12){// && HAL_GPIO_ReadPin(GPIOE, Liimit_switch_input2_Pin)) {
 			HAL_GPIO_WritePin(GPIOD, LiftingMotor_DIR_Pin, GPIO_PIN_RESET);
-			__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_4, 70);
+			__HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_4, 90);
 
 		} else {
 			low.stop();

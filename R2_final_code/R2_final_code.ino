@@ -100,15 +100,21 @@ void loop() {
     }
     else if (100<PS4.RStickX()){
       high.left();
-      digitalWrite(red,LOW);
-      digitalWrite(blue,HIGH);
+      digitalWrite(red,HIGH);
+      digitalWrite(blue,LOW);
       digitalWrite(green,HIGH);
     }
     else if (-100<PS4.RStickX() && PS4.RStickX()<-25){
       low.right();
+      digitalWrite(red,LOW);
+      digitalWrite(blue,HIGH);
+      digitalWrite(green,HIGH);
     }
     else if (-100>PS4.RStickX()){
      high.right();
+     digitalWrite(red,HIGH);
+    digitalWrite(blue,HIGH);
+    digitalWrite(green,HIGH);
     }      
     else{
       low.allLocoZero();
@@ -127,9 +133,11 @@ void loop() {
     }
     else if (PS4.L2() && (digitalRead(34))) { 
       l.lift(0);
+      action =0;
     }
-    else if (PS4.R2()) {
+    else if (PS4.R2() && digitalRead(13)) {
       l.lift(1);
+      action = 0;
     }else if(PS4.Square() && ((millis() - pass_time)>1000)){
       if(!pass_flag){
         digitalWrite(ball_pick_dir,HIGH);
@@ -191,7 +199,7 @@ void loop() {
         }
         break;
       case 2:
-        if(millis() - prev_time>=2400){
+        if(millis() - prev_time>=2800){
           l.allLagoriZero();
           action = 0;
         }else{
@@ -199,7 +207,7 @@ void loop() {
         }
         break;
       case 3:
-        if(millis() - prev_time>=3000){
+        if(millis() - prev_time>=3400){
           l.allLagoriZero();
           action = 0;
         }else{
